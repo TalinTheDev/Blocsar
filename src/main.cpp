@@ -4,10 +4,11 @@
 #include <Kesar/kesar.hpp>
 #include <Kesar/log.hpp>
 
+using namespace Kesar::log;
+
 int main() {
-  kesar::Log log;
-  log.info("Blocsar initialized");
-  log.info("Loaded Kesar v" + kesar::version());
+  info("Blocsar initialized");
+  info("Loaded Kesar v" + Kesar::version());
 
   return 0;
 }
