@@ -1,11 +1,11 @@
 // Copyright (c) 2026 Talin Sharma
 // SPDX-License-Identifier: MIT
 
-#include "Kesar/mesh.hpp"
 #include <Kesar/app.hpp>
 #include <Kesar/events.hpp>
 #include <Kesar/kesar.hpp>
 #include <Kesar/log.hpp>
+#include <Kesar/mesh.hpp>
 #include <Kesar/renderer.hpp>
 #include <Kesar/window.hpp>
 
@@ -35,6 +35,10 @@ int main() {
   Kesar::Mesh triangle;
   triangle.vertices(
       {{0.0f, 0.5f, 0.0f}, {-0.5f, -0.5f, 0.0f}, {0.5f, -0.5f, 0.0f}});
+
+  triangle.colors({{1.0f, 0.0f, 0.0f, 1.0f},
+                   {0.0f, 1.0f, 0.0f, 1.0f},
+                   {0.0f, 0.0f, 1.0f, 1.0f}});
 
   window.run([&render, &triangle]() { render.draw(triangle); }, []() {});
 
