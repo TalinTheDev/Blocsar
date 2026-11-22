@@ -1,10 +1,12 @@
 // Copyright (c) 2026 Talin Sharma
 // SPDX-License-Identifier: MIT
 
+#include "Kesar/mesh.hpp"
 #include <Kesar/app.hpp>
 #include <Kesar/events.hpp>
 #include <Kesar/kesar.hpp>
 #include <Kesar/log.hpp>
+#include <Kesar/renderer.hpp>
 #include <Kesar/window.hpp>
 
 using namespace Kesar::log;
@@ -22,22 +24,19 @@ int main() {
   info("Loaded Kesar v" + Kesar::version());
 
   Kesar::App app;
-
   app.onError(error);
-  Kesar::Window *window = app.createWindow(1000, 800, "Blocsar");
-  window->onKey(keyCallback);
 
-  window->run([]() {}, []() {});
+  Kesar::Window &window = app.createWindow(1000, 800, "Blocsar");
+  window.onKey(keyCallback);
+
+  const Kesar::Renderer &render =
+      window.getRenderer(Kesar::Color{1.0f, 1.0f, 1.0f, 1.0f});
+
+  Kesar::Mesh triangle;
+  triangle.vertices(
+      {{0.0f, 0.5f, 0.0f}, {-0.5f, -0.5f, 0.0f}, {0.5f, -0.5f, 0.0f}});
+
+  window.run([&render, &triangle]() { render.draw(triangle); }, []() {});
 
   return 0;
 }
-
-/*
- * kesar::App app()
- * kesar::Window* window = app.createWindow(width, height, title):
- *
- * void runWindowA(){ // do window rendering stuff }
- *
- * window->run(runWindowA);
- *
- */
