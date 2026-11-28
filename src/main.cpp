@@ -1,6 +1,7 @@
 // Copyright (c) 2026 Talin Sharma
 // SPDX-License-Identifier: MIT
 
+#include "Kesar/transform.hpp"
 #include "Kesar/types.hpp"
 #include <Kesar/app.hpp>
 #include <Kesar/events.hpp>
@@ -59,7 +60,7 @@ int main() {
   window.onMouse(mouseCallback);
 
   Kesar::Camera camera{};
-  camera.setPosition({0.0f, 0.0f, 3.0f});
+  camera.setPosition({0.0f, 0.0f, 5.0f});
   camera.setRotation({0, 90, 0});
   camera.setSpeed(5);
 
@@ -89,15 +90,24 @@ int main() {
   cube.indices({0, 1, 2, 2, 3, 0, 0, 7, 4, 4, 3, 0, 0, 7, 6,
                 6, 1, 0, 3, 2, 5, 5, 4, 3, 5, 4, 6, 6, 7, 4});
 
-  window.run([&render, &cube]() { render.draw(cube); },
-             [&camera, &window, &app]() {
-               if (keyboardState[escape])
-                 window.close();
-               camera.updateFly(window.getDeltaTime(), keyboardState, xOffset,
-                                yOffset);
-               xOffset = 0.0f;
-               yOffset = 0.0f;
-             });
+  Kesar::Transform cubeT{
+      {-1.0f, 1.0f, 0.0f}, {45.0f, 0.0f, 0.0f}, {2.0f, 1.0f, 1.0f}};
+  Kesar::Transform triangleT{
+      {1.0f, -1.0f, 0.0f}, {0.0f, 45.0f, 45.0f}, {1.0f, 1.0f, 2.0f}};
+
+  window.run(
+      [&]() {
+        render.draw(cube, &cubeT);
+        render.draw(triangle, &triangleT);
+      },
+      [&]() {
+        if (keyboardState[escape])
+          window.close();
+        camera.updateFly(window.getDeltaTime(), keyboardState, xOffset,
+                         yOffset);
+        xOffset = 0.0f;
+        yOffset = 0.0f;
+      });
 
   return 0;
 }
