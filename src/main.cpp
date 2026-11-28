@@ -18,12 +18,33 @@ std::unordered_map<unsigned int, bool> keyboardState{};
 const int WIDTH = 1000;
 const int HEIGHT = 800;
 
+float lastX = (float)WIDTH / 2.0f;
+float lastY = (float)HEIGHT / 2.0f;
+float xOffset = 0.0f;
+float yOffset = 0.0f;
+bool firstMove = true;
+float mouseSensitivity = 0.1f;
+
 void keyCallback(Kesar::Window *window, int key, int action) {
   if (action == press) {
     keyboardState[key] = true;
   } else if (action == release) {
     keyboardState[key] = false;
   }
+}
+
+void mouseCallback(Kesar::Window *window, float xPos, float yPos) {
+  if (firstMove) {
+    lastX = xPos;
+    lastY = yPos;
+    firstMove = false;
+    return;
+  }
+
+  xOffset += (xPos - lastX) * mouseSensitivity;
+  yOffset += (lastY - yPos) * mouseSensitivity;
+  lastX = xPos;
+  lastY = yPos;
 }
 
 int main() {
@@ -35,11 +56,12 @@ int main() {
 
   Kesar::Window &window = app.createWindow(WIDTH, HEIGHT, "Blocsar");
   window.onKey(keyCallback);
+  window.onMouse(mouseCallback);
 
   Kesar::Camera camera{};
   camera.setPosition({0.0f, 0.0f, 3.0f});
   camera.setRotation({0, 90, 0});
-  camera.setSpeed(0.05);
+  camera.setSpeed(5);
 
   camera.perspective(45, (float)WIDTH / (float)HEIGHT, 0.01, 100);
   Kesar::Renderer &render =
@@ -71,7 +93,10 @@ int main() {
              [&camera, &window, &app]() {
                if (keyboardState[escape])
                  window.close();
-               camera.updateFly(app.deltaTime(), keyboardState);
+               camera.updateFly(window.getDeltaTime(), keyboardState, xOffset,
+                                yOffset);
+               xOffset = 0.0f;
+               yOffset = 0.0f;
              });
 
   return 0;
