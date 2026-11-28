@@ -14,23 +14,15 @@ using namespace Kesar::log;
 using namespace Kesar::keys;
 using namespace Kesar::actions;
 
-Kesar::Vector3 cameraPos = {0.0f, 0.0f, 3.0f};
+std::unordered_map<unsigned int, bool> keyboardState{};
+const int WIDTH = 1000;
+const int HEIGHT = 800;
 
 void keyCallback(Kesar::Window *window, int key, int action) {
-  if (key == escape && action == press) {
-    window->close();
-  }
-  if (key == w && action == press) {
-    cameraPos.z -= 0.1;
-  }
-  if (key == s && action == press) {
-    cameraPos.z += 0.1;
-  }
-  if (key == a && action == press) {
-    cameraPos.x -= 0.1;
-  }
-  if (key == d && action == press) {
-    cameraPos.x += 0.1;
+  if (action == press) {
+    keyboardState[key] = true;
+  } else if (action == release) {
+    keyboardState[key] = false;
   }
 }
 
@@ -41,14 +33,15 @@ int main() {
   Kesar::App app;
   app.onError(error);
 
-  Kesar::Window &window = app.createWindow(1000, 800, "Blocsar");
+  Kesar::Window &window = app.createWindow(WIDTH, HEIGHT, "Blocsar");
   window.onKey(keyCallback);
 
   Kesar::Camera camera{};
-  camera.setPosition(cameraPos);
-  camera.setTarget({0.0f, 0.0f, 0.0f});
+  camera.setPosition({0.0f, 0.0f, 3.0f});
+  camera.setRotation({0, 90, 0});
+  camera.setSpeed(0.05);
 
-  camera.perspective(60, 1000.0f / 800.0f, 0.1, 10);
+  camera.perspective(45, (float)WIDTH / (float)HEIGHT, 0.01, 100);
   Kesar::Renderer &render =
       window.getRenderer(Kesar::Color{1.0f, 1.0f, 1.0f, 1.0f});
 
@@ -62,8 +55,24 @@ int main() {
                    {0.0f, 1.0f, 0.0f, 1.0f},
                    {0.0f, 0.0f, 1.0f, 1.0f}});
 
-  window.run([&render, &triangle]() { render.draw(triangle); },
-             [&camera]() { camera.setPosition(cameraPos); });
+  Kesar::Mesh cube;
+  cube.vertices({{-0.5f, 0.5f, -0.5f},
+                 {-0.5f, 0.5f, 0.5f},
+                 {0.5f, 0.5f, 0.5f},
+                 {0.5f, 0.5f, -0.5f},
+                 {0.5f, -0.5f, -0.5f},
+                 {0.5f, -0.5f, 0.5f},
+                 {-0.5f, -0.5f, 0.5f},
+                 {-0.5f, -0.5f, -0.5f}});
+  cube.indices({0, 1, 2, 2, 3, 0, 0, 7, 4, 4, 3, 0, 0, 7, 6,
+                6, 1, 0, 3, 2, 5, 5, 4, 3, 5, 4, 6, 6, 7, 4});
+
+  window.run([&render, &cube]() { render.draw(cube); },
+             [&camera, &window, &app]() {
+               if (keyboardState[escape])
+                 window.close();
+               camera.updateFly(app.deltaTime(), keyboardState);
+             });
 
   return 0;
 }
